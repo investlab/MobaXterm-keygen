@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+</head>
+<body>
+    <h1>MobaXterm</h1>
+    <form id="license-form">
+        <label for="username">User:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="version">Version (e.g., 24.2):</label>
+        <input type="text" id="version" name="version" required pattern="^[0-9]+\.[0-9]+$">
+        <br>
+        <button type="submit">Generate License</button>
+    </form>
+    <p id="output"></p>
+    <a id="download-link" style="display:none;">Download Custom.mxtpro</a>
+
+    <script>
+        const VariantBase64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        const VariantBase64Dict = {};
+        const VariantBase64ReverseDict = {};
+
+        for (let i = 0; i < VariantBase64Table.length; i++) {
+            VariantBase64Dict[i] = VariantBase64Table[i];
+            VariantBase64ReverseDict[VariantBase64Table[i]] = i;
+        }
+
+        function variantBase64Encode(bytes) {
+            let result = '';
+            let padding = '';
+            for (let i = 0; i < bytes.length; i += 3) {
+                const a = bytes[i];
+                const b = bytes[i + 1] || 0;
+                const c = bytes[i + 2] || 0;
+                result += VariantBase64Dict[a & 63];
+                result += VariantBase64Dict[(a >> 6) | ((b & 15) << 2)];
+                result += (i + 1 < bytes.length) ? VariantBase64Dict[(b >> 4) | ((c & 3) << 4)] : '=';
+                result += (i + 2 < bytes.length) ? VariantBase64Dict[c >> 2] : '=';
+            }
+            return result;
+        }
+
+        function encryptBytes(key, bytes) {
+            const result = new Uint8Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) {
+                result[i] = bytes[i] ^ ((key >> 8) & 0xff);
+                key = result[i] & key | 0x482D;
+            }
+            return result;
+        }
+
+        document.getElementById('license-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const version = document.getElementById('version').value.split('.');
+            const majorVersion = parseInt(version[0]);
+            const minorVersion = parseInt(version[1]);
+
+            const licenseString = `${1}#${username}|${majorVersion}${minorVersion}#1#${majorVersion}3${minorVersion}6${minorVersion}#0#0#0#`;
+            const encryptedLicense = encryptBytes(0x787, new TextEncoder().encode(licenseString));
+            const encodedLicense = variantBase64Encode(encryptedLicense);
+
+            const zip = new JSZip();
+            zip.file('Pro.key', encodedLicense);
+
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const downloadLink = document.getElementById('download-link');
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = 'Custom.mxtpro';
+            downloadLink.style.display = 'block';
+            downloadLink.textContent = 'Download Custom.mxtpro';
+
+            document.getElementById('output').textContent = 'License generated successfully!';
+        });
+    </script>
+</body>
+</html>
