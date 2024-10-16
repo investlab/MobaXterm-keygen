@@ -1,24 +1,112 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>License Generator</title>
+    <title>MOBAXTERM</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: left;
+            color: #555;
+            font-family: monospace;
+        }
+        #output {
+            margin-top: 20px;
+            color: #333;
+        }
+        footer {
+            margin-top: 100px;
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <h1>MobaXterm</h1>
-    <form id="license-form">
-        <label for="username">User:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="version">Version (e.g., 24.2):</label>
-        <input type="text" id="version" name="version" required pattern="^[0-9]+\.[0-9]+$">
-        <br>
-        <button type="submit">Generate License</button>
-    </form>
-    <p id="output"></p>
-    <a id="download-link" style="display:none;">Download Custom.mxtpro</a>
+    <div class="container">
+        <h1>MOBAXTERM</h1>
+        <form id="license-form">
+            <label for="username">YOUR NAME:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            
+            <label for="version">VERSION:</label>
+            <input type="text" id="version" name="version" placeholder="Enter MobaXterm version (e.g., 24.2)" required pattern="^[0-9]+\.[0-9]+$">
+            
+            <button type="submit">DOWNLOAD</button>
+
+            <div class="info-box">
+                COPY TO: "C:\Program Files (x86)\Mobatek\MobaXterm"
+            </div>
+        </form>
+        <p id="output"></p>
+    </div>
+
+    <footer>
+        by Thao Pham @ 2024
+    </footer>
 
     <script>
         const VariantBase64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -69,13 +157,14 @@
             zip.file('Pro.key', encodedLicense);
 
             const blob = await zip.generateAsync({ type: 'blob' });
-            const downloadLink = document.getElementById('download-link');
+            const downloadLink = document.createElement('a');
             downloadLink.href = URL.createObjectURL(blob);
             downloadLink.download = 'Custom.mxtpro';
-            downloadLink.style.display = 'block';
-            downloadLink.textContent = 'Download Custom.mxtpro';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
 
-            document.getElementById('output').textContent = 'License generated successfully!';
+            document.getElementById('output').textContent = 'License generated and downloaded successfully!';
         });
     </script>
 </body>
